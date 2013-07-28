@@ -12,7 +12,7 @@ public:
             j = i + 1;
             k = n - 1;
             
-            while(j < k){3=
+            while(j < k){
                 closetarget = num[i] + num[j] + num[k];
                 if(abs(closetarget-target) < abs(close-target)){
                     close = closetarget;
