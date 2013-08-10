@@ -7,7 +7,7 @@ public:
         // Start typing your C/C++ solution below
         // DO NOT write int main() function
 
-        if(s.size() == 0 || testpart(s) == true)
+        if(s.size() == 0)
             return 0;
      
         
