@@ -1,3 +1,46 @@
+class Solution {
+public:
+    bool isMatch(const char *s, const char *p) {
+        // Start typing your C/C++ solution below
+        // DO NOT write int main() function
+        bool starcheck = false;
+        int i;
+        LOOP:
+        for(i = 0; i < strlen(s); i ++){
+            if(p[i] == '?' || s[i] == p[i]){
+                continue;
+            }
+            else if(p[i] == '*'){
+                p += i +1;
+                s += i;
+                
+                while(*p == '*')
+                    p++;
+                
+                starcheck = true;
+                goto LOOP;
+                
+            }
+            else if(p[i] != s[i]){
+                if(starcheck == true){
+                    s++;
+                    goto LOOP;
+                }
+                else return false;
+            }
+        }
+        
+        while(p[i] == '*')
+            i++;
+        if(p[i] == '\0')
+            return true;
+        else
+            return false;
+    }
+};
+
+
+
 vector<vector<bool>> mark; 
        vector<bool> res;
 class Solution {
