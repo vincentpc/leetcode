@@ -1,115 +1,110 @@
-vector<vector<string> > results;
-    struct point{
-        string s;
-        int depth;
-        map<string,int> r;
-        
-        
-    };
-    queue<point> q;
 class Solution {
 public:
-    string startstr;
-    string endstr;
-    int count;
-    
-    
 
-    
-    bool test(unordered_set<string> dict){
-        vector<string> res;
-        point newp;
-        string temp;
-        while(!q.empty()){
-            point nowp = q.front();
-            q.pop();
-            
-            if(count != 0 && nowp.depth > count)
-                break;
-            
-            if(nowp.s == endstr){
-                if(count == 0){
-                    count = nowp.depth;   
-                    
-                    res.resize(nowp.r.size());
-                    map<string,int>::iterator it;
-                    for(it = nowp.r.begin(); it != nowp.r.end(); it++){
-                        res[it->second] = it->first;
-                    }
-                    results.push_back(res);  
-                }
-                else{
-                    
-                    res.resize(nowp.r.size());
-                    map<string,int>::iterator it;
-                    for(it = nowp.r.begin(); it != nowp.r.end(); it++){
-                        res[it->second] = it->first;
-                    }
-                    results.push_back(res);   
-                }
-                continue;
-            }
-            
-            
-            
-            for(int i = 0; i < nowp.s.size(); i ++){
-                for(int j = 'a'; j <= 'z'; j ++){
-                    temp = nowp.s;
-                    
-                    if(nowp.s[i] == j)
-                        continue;
-                    else
-                        temp[i] = j;
-                    
-                    if(nowp.r.find(temp) == nowp.r.end()){
-                    
-                        if(dict.find(temp)!= dict.end()){
-                            
-                            newp.s = temp;
-                            newp.depth = nowp.depth+1;
-                            newp.r = nowp.r;
-                            newp.r[temp] = nowp.r.size();
-                            
-                            
-                            //newp.save = nowp.save;
-                            //newp.save.push_back(temp);
-                            q.push(newp);
-                            //dict.erase(temp);
+        vector<vector<string>> results;
+        vector<int> path;
         
-                        }
-                    }
-                }
+    void genpath(int v1, int v2, vector<string> &vdict, vector<vector<int> >& prev, 
+             vector<int> res){
+        
+        res.push_back(v2);
+        
+        if(v1 == v2){
+            vector<string> result;
+            for(int i = res.size() -1; i >= 0; i --){
+                result.push_back(vdict[res[i]]);
             }
+            results.push_back(result);
+            return;
             
-            
-
         }
         
-        return false;
+        vector<int> adj = prev[v2];
+        
+        for(int i = 0; i < adj.size(); i ++){
+            genpath(v1,adj[i],vdict,prev,res);
+        }
+        
+        res.pop_back();
+        return;
+        
+        
+                 
     }
+                 
     vector<vector<string>> findLadders(string start, string end, unordered_set<string> &dict) {
         // Start typing your C/C++ solution below
         // DO NOT write int main() function
-        startstr = start;
-        endstr = end;
         
-        count = 0;
-        
-        while(!q.empty())
-         q.pop();
+    
+        dict.insert(start);
+        dict.insert(end);
          
-        results.clear();
+        vector<string> vdict(dict.begin(), dict.end()); // vector dictionary: id -> word mapping in dict
+        unordered_map<string, int> ids;  // index dictionary: word -> id mapping in vdict
+        vector<vector<int> > prev(dict.size()); // store the previous words in BFS
+        vector<int> distance(dict.size(), -1); // store the distance from start
+         
+        // build string - index mapping, transfer problem to graph search
+        // use interger instead of string to eliminate cost of string matching
+        for(int i = 0; i < vdict.size(); i++)
+            ids[vdict[i]] = i;        
+
         
-        point newp;
-        newp.s = startstr;
-        newp.depth = 1;
-        newp.r[startstr] = 0;
-        q.push(newp);
+        // find the index of start and end words
+        int vbeg=0, vend=0;
+        while(vdict[vbeg] != start) vbeg++;
+        while(vdict[vend] != end) vend++;
+         
+        // use queue for BFS to search path from start to end
+        queue<int> que;
+        que.push(vbeg);
+        distance[vbeg]=0;
+        
+        while(!que.empty()){
+            int now =  que.front();
+            que.pop();
+            
+            if(now == vend){
+                break;
+            }
+            
+            int d = distance[now]+1;
+            
+            vector<int> adj;
+            ids.erase(vdict[now]);
+            
+            for(int i = 0; i < vdict[now].size(); i ++){
+                char w = vdict[now][i];
+                for(char j = 'a'; j <= 'z'; j ++){
+                    vdict[now][i] = j;
+                    if(ids.count(vdict[now])){
+                        adj.push_back(ids[vdict[now]]);
+                    }
+                    vdict[now][i] = w;
+                }
+            }
+            
+            
+            for(int i = 0; i < adj.size(); i ++){
+                if(distance[adj[i]] == -1){
+                    distance[adj[i]] = d;
+                    que.push(adj[i]);
+                    prev[adj[i]].push_back(now);
+                    
+                }
+                else if(distance[adj[i]] == d){
+                    prev[adj[i]].push_back(now);
+                }
+            }
+            
+        }
         
 
-        test(dict);
-    
-        return results;        
+        results.clear();
+        path.clear();
+        genpath(vbeg, vend, vdict, prev, path);
+        return results;
+        
     }
 };
-
